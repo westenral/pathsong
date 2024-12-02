@@ -6,8 +6,13 @@
 #define PATHSONG_SONGGRAPH_H
 
 
+#include <string>
+#include <vector>
 class SongGraph {
-
+public:
+    // the primary function of the SongGraph. Given two names, finds the best
+    // path between them.
+    std::vector <std::string> get_path(std::string &song_1, std::string &song_2);
 };
 
 

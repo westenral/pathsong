@@ -10,7 +10,7 @@
 #include <string>
 
 class Song {
-
+public:
     // given a line from the csv file, extract the needed attributes
     void from_csv_entry(std::string data);
 
