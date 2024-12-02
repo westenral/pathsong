@@ -1,5 +1,6 @@
 We will be comparing the algorithms: dijkstra and prims
-These algorithms will be compared given the task of creating a path (edge)
-that connects two songs chosen by the user. These connections will be based off of
-a similarity score which will be determined using subsets like genre, key, and mode.
-Using the dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset/data
+These algorithms will be compared given the task of traversing a graph.
+The goal of these traversals is to highlight a path (edge) that connects two songs
+chosen by the user. These connections will be based off of a similarity score which
+will be determined using subsets like genre, key, tempo, and mode.
+Dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset/data
