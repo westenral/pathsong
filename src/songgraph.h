@@ -6,7 +6,7 @@
 #define PATHSONG_SONGGRAPH_H
 
 
-class songgraph {
+class SongGraph {
 
 };
 
