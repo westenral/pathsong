@@ -1,0 +1,4 @@
+We will be comparing the algorithms: dijkstra and prims
+These algorithms will be compared given the task of creating a path (edge)
+that connects two songs chosen by the user. These connections will be based off of
+a similarity score which will be determined using subsets like genre, key, and mode.
