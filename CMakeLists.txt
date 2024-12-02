@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_executable(pathsong src/main.cpp
         include/test.h
-        include/types.h
         src/songgraph.h
         src/song.h
         src/song.cpp
