@@ -6,7 +6,6 @@
 #include "../include/song.h"
 #include <fstream>
 #include <queue>
-#include <stack>
 
 namespace {
     struct Path {
@@ -143,4 +142,5 @@ u32 SongGraph::find_song_id(std::string name) {
         if (song.name == name) return i;
         i++;
     }
+    return -1;
 }
