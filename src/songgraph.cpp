@@ -134,5 +134,13 @@ std::vector<u8> SongGraph::edges(u32 v) {
 }
 
 u8 SongGraph::edge(u32 v1, u32 v2) {
-    songs[v1].similarity(songs[v2]);
+    return songs[v1].similarity(songs[v2]);
+}
+
+u32 SongGraph::find_song_id(std::string name) {
+    u32 i = 0;
+    for (const auto &song : songs) {
+        if (song.name == name) return i;
+        i++;
+    }
 }
