@@ -25,6 +25,10 @@ int main(int argc, char **argv) {
     SongGraph songgraph("pop_songs.csv");
     auto path = songgraph.get_path(song1, song2);
 
+    if (path.empty()) {
+        std::cout << "No path found -- make sure song titles are spelled correctly!\n";
+    }
+
     for (const auto &songname : path) {
         std::cout << songname << std::endl;
     }
