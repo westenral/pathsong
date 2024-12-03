@@ -12,7 +12,7 @@ void Song::from_csv_entry(std::string data) {  // extracting attributes
     stringstream ss(data);
     string s;  // stores token obtained from original string
 
-    // FIXME currently ignore quotes escaping commas (example: eddie vedder "Eat, Pray, Love" splits on commas when it shouldn't)
+    // BUG currently ignore quotes escaping commas (example: eddie vedder "Eat, Pray, Love" splits on commas when it shouldn't)
     while(getline(ss, s, ',')) {
         attr.push_back(s);
     }
