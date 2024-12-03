@@ -9,18 +9,37 @@
 void Song::from_csv_entry(std::string data) {  // extracting attributes
     // indices: 4: name, 9: energy, 10: key, 12: mode, 20: genre
     vector<string> attr;  // attribute vec
-    stringstream ss(data);
-    string s;  // stores token obtained from original string
+    bool in_quotes = false;
+    string curr_field;
 
-    // BUG currently ignore quotes escaping commas (example: eddie vedder "Eat, Pray, Love" splits on commas when it shouldn't)
-    while(getline(ss, s, ',')) {
-        attr.push_back(s);
+    for(size_t i = 0; i < data.size(); i++) {
+        char c = data[i];
+        if(c == '"') {
+            if(in_quotes && i + 1 < data.size() && data[i + 1] == '"') {
+                curr_field += '"';
+                i++;  // skipping next quote
+            }
+            else {
+                in_quotes = !in_quotes;
+            }
+        }
+        else if(c == ',' && !in_quotes) {
+            attr.push_back(curr_field);
+            curr_field.clear();
+        }
+        else {
+            curr_field += c;
+        }
     }
-    name = attr[4];
-    energy = stof(attr[9]);
-    key = stoi(attr[10]);
-    mode = stoi(attr[12]);
-    genre = attr[20];
+    attr.push_back(curr_field);  // adding last field
+
+    if(attr.size() > 20) {  // enough fields exist
+        name = attr[4];
+        energy = stof(attr[9]);
+        key = stoi(attr[10]);
+        mode = stoi(attr[12]);
+        genre = attr[20];
+    }
 }
 
 u8 Song::similarity(Song &rhs) {  // similarity sum / total similarity = similarity score

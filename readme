@@ -7,9 +7,11 @@ We will be comparing the algorithms: dijkstra and prims
 These algorithms will be compared given the task of traversing a graph.
 The goal of these traversals is to highlight a path (edge) that connects two songs
 chosen by the user with the aim of creating a smooth transition between songs that can
-be used for a variety of tasks, like making mashups and dj-ing. These connections will
-be based off of a similarity score from 0 - 255 (with 0 being max similarity) which will
+be used for a variety of tasks, like making mashups and dj-ing. [These connections will
+be based off of a similarity score from 0 - 255 (with 0 being max similarity)] which will
 be determined using subsets like key, mode, genre, and energy.
+
+// [] subject to change
 
 
 The SongGraph class contains our adjacency matrix representation of a graph of songs
