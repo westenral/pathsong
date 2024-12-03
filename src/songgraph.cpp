@@ -5,6 +5,19 @@
 #include "../include/songgraph.h"
 #include "../include/song.h"
 #include <fstream>
+#include <queue>
+
+namespace {
+    struct Edge {
+        u8 weight;
+        u32 from;
+        u32 to;
+
+        bool operator<(const Edge &rhs) const {
+            return weight < rhs.weight;
+        }
+    };
+}
 
 SongGraph::SongGraph(std::string song_csv) {
     std::ifstream data(song_csv);
@@ -26,7 +39,7 @@ std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &so
     // traverse internal graph to find shortest path
 }
 
-std::vector<size_t> SongGraph::get_path(size_t song1, size_t song2) {
+std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
     // priority queue of edge weights
     // whether a vertex has been visited
     // predecessors
@@ -34,4 +47,7 @@ std::vector<size_t> SongGraph::get_path(size_t song1, size_t song2) {
     // pick the smallest edge
     // if we found the target - check through predecessors to get path
 
+    std::priority_queue<Edge> edges;
+
+    
 }

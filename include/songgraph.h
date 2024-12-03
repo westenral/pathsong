@@ -7,7 +7,7 @@
 
 
 #include "song.h"
-#include "types.h"
+#include "../include/types.h"
 
 #include <string>
 #include <vector>
@@ -19,12 +19,12 @@ private:
 
     // return the edge weight between the two vertices
     // edge weight is identical to similarity score (`Song::similarity`)
-    u8 edge(size_t v1, size_t v2);
+    u8 edge(u32 v1, u32 v2);
 
     // return all edge weights
-    std::vector<u8> edges(size_t v);
+    std::vector<u8> edges(u32 v);
 
-    std::vector<size_t> get_path(size_t song1, size_t song2);
+    std::vector<u32> get_path(u32 song1, u32 song2);
 
 public:
 
