@@ -61,7 +61,52 @@ std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &so
     return path_names;
 }
 
+void SongGraph::insert_weight(u32 from, u32 to, u8 weight) {
+    this->weight[from][to] = weight;
+    this->weight[to][from] = weight;
+}
+
 std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
+    return get_path_old(song1, song2);
+
+    /*
+    std::vector<u32> dist(songs.size(), 0xffffffff);
+    dist[song1] = 0;
+    std::vector<u32> predecessor(songs.size(), song1);
+    std::priority_queue<Path, std::vector<Path>, std::less<Path>> paths;
+    std::vector<bool> visited(songs.size(), false);
+    visited[song1] = true;
+
+    for (const auto &[to, weight] : weight[song1]) {
+        paths.push({(u32)255 - weight, song1, to});
+        dist[to] = weight;
+    }
+
+    while (!visited[song2]) {
+        auto path = paths.top();
+        paths.pop();
+
+        if (visited[path.to]) { continue; }
+
+        u32 difference = dist[path.from] + 255 - path.weight;
+        
+        if (dist[path.to] < difference) { continue; }
+
+        visited[path.to] = true;
+        dist[path.to] = difference;
+        predecessor[path.to] = path.from;
+
+        auto to_adjacent_weights = weight[path.to];
+        for (const auto &[to, weight] : to_adjacent_weights) {
+            paths.push()
+            dist[to] = dist[path.to] + weight;
+        }
+    }
+
+    */
+}
+
+std::vector<u32> SongGraph::get_path_old(u32 song1, u32 song2) {
     // this method works by traversing a graph where each edge weight
     // represents how different the two songs are
 
@@ -110,6 +155,8 @@ std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
 
         // set dist to 'to'
         dist[path.to] = path.weight;
+
+        predecessor[path.to] = path.from;
         
         // add all of to's edges to the queue
         weights = edges(path.to);
@@ -117,10 +164,10 @@ std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
             // if we've visited the vertex already, skip
             if (visited[i]) { continue; }
             
-            // add an edge: weight = dist[to] + diff score
+            // add an edge: weight = dist[from] + diff score
             //              from = to
             //              to = next vtex
-            paths.push({dist[path.to] + 255 - weights[i], path.to, i});
+            paths.push({dist[path.from] + 255 - weights[i], path.to, i});
         }
     }
 
