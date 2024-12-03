@@ -25,7 +25,7 @@ public:
     void from_csv_entry(std::string data);
 
     // given another song, calculate the similarity
-    // returns an integer from 0 to 255, where 255 is least similar
+    // returns an integer from 0 to 255, where 255 is most
     u8 similarity(Song &rhs);
 };
 
