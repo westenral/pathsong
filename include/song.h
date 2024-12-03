@@ -6,11 +6,21 @@
 #define PATHSONG_SONG_H
 
 #include "../include/types.h"
+#include <iostream>
+using namespace std;
 
 #include <string>
+#include <vector>
 
 class Song {
 public:
+    string name;
+    float energy;  // from 0.0 - 1.0; measure of intensity and activity
+    int key;  // standard pitch class notation; 0 = C, 1 = C#/Db, 2 = D, etc.
+    int mode;  // major (1) or minor (0)
+    string genre;
+
+
     // given a line from the csv file, extract the needed attributes
     void from_csv_entry(std::string data);
 

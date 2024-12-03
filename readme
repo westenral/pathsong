@@ -1,6 +1,16 @@
+Authors: Liliana Cantero, Paul Baroco, Pamela Vishka
+Team Name: LPP
+Project Name: PathSong
+Dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset/data
+
 We will be comparing the algorithms: dijkstra and prims
 These algorithms will be compared given the task of traversing a graph.
 The goal of these traversals is to highlight a path (edge) that connects two songs
-chosen by the user. These connections will be based off of a similarity score which
-will be determined using subsets like genre, key, tempo, and mode.
-Dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset/data
+chosen by the user with the aim of creating a smooth transition between songs that can
+be used for a variety of tasks, like making mashups and dj-ing. These connections will
+be based off of a similarity score from 0 - 255 (with 0 being max similarity) which will
+be determined using subsets like key, mode, genre, and energy.
+
+
+The SongGraph class contains our adjacency matrix representation of a graph of songs
+that will be narrowed down from the data set for convenience using the subsets.
