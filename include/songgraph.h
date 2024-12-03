@@ -17,6 +17,10 @@ private:
 
     std::vector<Song> songs;
 
+    std::vector<u32> get_songs_with_key(u32 key);
+    std::vector<u32> get_songs_with_genre(std::string genre);
+    std::vector<u32> get_songs_with_mode(u32 mode);
+
     // return the edge weight between the two vertices
     // edge weight is identical to similarity score (`Song::similarity`)
     u8 edge(u32 v1, u32 v2);
