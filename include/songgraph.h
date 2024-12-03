@@ -9,6 +9,7 @@
 #include "song.h"
 #include "../include/types.h"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -16,6 +17,9 @@ class SongGraph {
 private:
 
     std::vector<Song> songs;
+    std::map<string, vector<u32>> genreMap;
+    std::vector<vector<u32>> keyMap;
+    std::vector<vector<u32>> modeMap;  // 0 minor, 1 major
 
     std::vector<u32> get_songs_with_key(u32 key);
     std::vector<u32> get_songs_with_genre(std::string genre);

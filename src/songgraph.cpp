@@ -162,14 +162,14 @@ u32 SongGraph::find_song_id(std::string name) {
     return i;
 }
 
-std::vector<u32> SongGraph::get_songs_with_key(u32 key) {
-    
+std::vector<u32> SongGraph::get_songs_with_key(u32 key) {  // using vector<vector<>>  // input is 0-11
+     return keyMap[key];
 }
 
-std::vector<u32> SongGraph::get_songs_with_genre(std::string genre) {
-    
+std::vector<u32> SongGraph::get_songs_with_genre(std::string genre) {  // using map
+    return genreMap[genre];
 }
 
-std::vector<u32> SongGraph::get_songs_with_mode(u32 mode) {
-    
+std::vector<u32> SongGraph::get_songs_with_mode(u32 mode) {  // using vector<vector<>>
+    return modeMap[mode];
 }
