@@ -3,6 +3,7 @@
 #include <string>
 
 int main(int argc, char **argv) {
+    /*
     // Test CSV data points
     vector<string> csv_data = {
             "0,5SuOikwiRyPMVoIQDJUgSV,Gen Hoshino,Comedy,Comedy,73,230666,False,0.676,0.461,1,-6.746,0,0.143,0.0322,1.01e-06,0.358,0.715,87.917,4,acoustic",
@@ -25,6 +26,7 @@ int main(int argc, char **argv) {
         cout << "Genre: " << song.genre << endl;
         cout << endl;
     }
+    */
 
     std::string song1, song2;
 

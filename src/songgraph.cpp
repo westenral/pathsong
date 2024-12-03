@@ -4,6 +4,7 @@
 
 #include "../include/songgraph.h"
 #include "../include/song.h"
+#include <algorithm>
 #include <fstream>
 #include <queue>
 
@@ -39,8 +40,12 @@ SongGraph::SongGraph(std::string song_csv) {
 }
 
 std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &song2) {
-    // TODO lookup song ids from name
-    u32 song1_id = 0, song2_id = 0;
+    u32 song1_id = find_song_id(song1);
+    u32 song2_id = find_song_id(song2);
+
+    if (song1_id == songs.size() || song2_id == songs.size()) {
+        return {};
+    }
 
     // traverse internal graph to find shortest path
     auto path_ids = get_path(song1_id, song2_id);
@@ -57,65 +62,77 @@ std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &so
 }
 
 std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
-    // priority queue of edge weights
-    // whether a vertex has been visited
-    // predecessors
+    // this method works by traversing a graph where each edge weight
+    // represents how different the two songs are
 
-    // pick the smallest edge
-    // if we found the target - check through predecessors to get path
+    // distance from origin (song1) to each vertex
+    // distance to origin is 0
+    std::vector<u32> dist(songs.size(), 0xffffffff);
+    dist[song1] = 0;
 
-    // list of distances to each vertex
-    const u32 max_distance = 0xffffffff;
-    std::vector<u32> dists(songs.size(), max_distance);
-    dists[song1] = 0;
+    // predecessor of each vertex
+    std::vector<u32> predecessor(songs.size(), song1);
+    
+    // priority queue of accessible edges, where the next edge to travel to is
+    // the edge with least weight.
+    // the weights include the distance to the the vertex they are connected to
+    // just because an edge is in the queue doesn't mean it's optimal, but the
+    // optimal path should always be chosen first
+    std::priority_queue<Path, std::vector<Path>, std::less<Path>> paths;
 
-    // list of whether each vertex has been visited
+    // whether each vertex has been visited. a vertex is "visited" once a
+    // optimal path to it has been found
+    // so far, the only visited vertex is the origin
     std::vector<bool> visited(songs.size(), false);
     visited[song1] = true;
 
-    // predecessor of each vertex
-    std::vector<u32> predecessors(songs.size(), song1);
+    // every time we visit a vertex, add its edges to the queue -- start off
+    // with the origin
+    // see below for reasoning behind formula
+    std::vector<u8> weights = edges(song1);
+    for (u32 i = 0; i < weights.size(); i++) {
+        paths.push({(u32)255 - weights[i], song1, i});
+    }
 
-    // the next edge to search
-    std::priority_queue<Path, std::vector<Path>, std::greater<Path>> next_edges;
+    u32 steps = 0;
+    // as long as we haven't visited song2 yet, keep searching
+    while (!visited[song2]) {
+        std::cout << steps++ << '\n';
+        // take the next edge
+        auto path = paths.top();
+        paths.pop();
 
-    auto current_vertex = song1;
+        // if we've already visited 'to', skip
+        if (visited[path.to]) { continue; }
 
-    while (current_vertex != song2) {
-        // list of all edge weights adjacent to current vertex
-        std::vector<u8> adjacent_edges = this->edges(current_vertex);
+        // we've visited 'to'
+        visited[path.to] = true;
 
-        // push all edge weights into the priority queue
-        for (u32 i = 0; i < adjacent_edges.size(); i++) {
+        // set dist to 'to'
+        dist[path.to] = path.weight;
+        
+        // add all of to's edges to the queue
+        weights = edges(path.to);
+        for (u32 i = 0; i < weights.size(); i++) {
+            // if we've visited the vertex already, skip
             if (visited[i]) { continue; }
-            // the "255 - weight" lets us construct a minimum spanning tree by
-            // inverting the similarity score (to get a "difference" score) and
-            // using that
-            next_edges.push({255 - adjacent_edges[i] + dists[current_vertex], song1, i});
+            
+            // add an edge: weight = dist[to] + diff score
+            //              from = to
+            //              to = next vtex
+            paths.push({dist[path.to] + 255 - weights[i], path.to, i});
         }
-
-        // choose next vertex to visit
-        auto next_edge = next_edges.top();
-        next_edges.pop();
-        u32 next_vertex = next_edge.to;
-        dists[next_vertex] = next_edge.weight;
-        visited[next_vertex] = true;
-        predecessors[next_vertex] = current_vertex;
-        current_vertex = next_vertex;
     }
 
-    std::vector<u32> path_reverse;
-    while (current_vertex != song1) {
-        path_reverse.push_back(current_vertex);
-        current_vertex = predecessors[current_vertex];
-    }
-
-    // reverse path
+    // find the path from end to start
     std::vector<u32> path;
-    path.reserve(path_reverse.size());
-    for (u32 id : path_reverse) {
-        path.push_back(id);
+    u32 next_song_id = song2;
+    while (next_song_id != song1) {
+        path.push_back(next_song_id);
+        next_song_id = predecessor[next_song_id];
     }
+    path.push_back(song1);
+    std::reverse(path.begin(), path.end());
 
     return path;
 }
