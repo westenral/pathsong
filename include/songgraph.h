@@ -6,6 +6,7 @@
 #define PATHSONG_SONGGRAPH_H
 
 
+#include "song.h"
 #include "types.h"
 
 #include <string>
@@ -14,13 +15,20 @@
 class SongGraph {
 private:
 
+    std::vector<Song> songs;
+
     // return the edge weight between the two vertices
     // edge weight is identical to similarity score (`Song::similarity`)
     u8 edge(size_t v1, size_t v2);
 
+    // return all edge weights
+    std::vector<u8> edges(size_t v);
+
     std::vector<size_t> get_path(size_t song1, size_t song2);
 
 public:
+
+    SongGraph(std::string song_csv);
 
     // the primary function of the SongGraph. Given two names, finds the best
     // path between them.
