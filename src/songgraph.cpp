@@ -142,5 +142,5 @@ u32 SongGraph::find_song_id(std::string name) {
         if (song.name == name) return i;
         i++;
     }
-    return -1;
+    return i;
 }

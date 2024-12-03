@@ -27,7 +27,7 @@ private:
     std::vector<u32> get_path(u32 song1, u32 song2);
 
     // find the song id based on its name
-    // return -1 if song not found
+    // return songs.size() if song not found
     // (right now, implemented as a linear search through the songs vector)
     u32 find_song_id(std::string name);
 
