@@ -120,3 +120,19 @@ std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
 
     return path;
 }
+
+std::vector<u8> SongGraph::edges(u32 v) {
+    // right now, it computes the edges on-the-fly
+    std::vector<u8> weights;
+    weights.reserve(songs.size());
+
+    for (u32 i = 0; i < songs.size(); i++) {
+        weights.push_back(edge(v, i));
+    }
+
+    return weights;
+}
+
+u8 SongGraph::edge(u32 v1, u32 v2) {
+    songs[v1].similarity(songs[v2]);
+}

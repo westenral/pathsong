@@ -21,7 +21,7 @@ private:
     // edge weight is identical to similarity score (`Song::similarity`)
     u8 edge(u32 v1, u32 v2);
 
-    // return all edge weights
+    // return all adjacent edge weights
     std::vector<u8> edges(u32 v);
 
     std::vector<u32> get_path(u32 song1, u32 song2);
