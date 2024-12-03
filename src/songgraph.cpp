@@ -35,8 +35,21 @@ SongGraph::SongGraph(std::string song_csv) {
 }
 
 std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &song2) {
-    // lookup song ids from name
+    // TODO lookup song ids from name
+    u32 song1_id, song2_id;
+
     // traverse internal graph to find shortest path
+    auto path_ids = get_path(song1_id, song2_id);
+
+    // translate ids to names
+    std::vector<std::string> path_names;
+    path_names.reserve(path_ids.size());
+
+    for (const auto id : path_ids) {
+        path_names.push_back(songs[id].name);
+    }
+
+    return path_names;
 }
 
 std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
