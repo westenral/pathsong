@@ -30,9 +30,34 @@ int main(int argc, char **argv) {
     sf::Text song1Label("Song 1:", font, 20);
     sf::Text song2Label("Song 2:", font, 20);
     sf::Text resultText("", font, 18);
-    sf::Text findPathButton("Find Path!", font, 22);
-    sf::Text dijkstraButton("Dijkstra's", font, 20);
-    sf::Text aStarButton("A*", font, 20);
+
+    sf::RectangleShape dijkstraButton(sf::Vector2f(200, 50));
+    dijkstraButton.setFillColor(sf::Color::Black);
+    dijkstraButton.setPosition(150, 300);
+
+    sf::Text dijkstraText("Dijkstra's", font, 24);
+    dijkstraText.setFillColor(sf::Color::White);
+    dijkstraText.setPosition(dijkstraButton.getPosition().x + (dijkstraButton.getSize().x - dijkstraText.getLocalBounds().width) / 2,
+                             dijkstraButton.getPosition().y + (dijkstraButton.getSize().y - dijkstraText.getLocalBounds().height) / 2);
+
+    sf::RectangleShape aStarButton(sf::Vector2f(200, 50));
+    aStarButton.setFillColor(sf::Color::Black);
+    aStarButton.setPosition(350, 300);
+
+    sf::Text aStarText("A*", font, 24);
+    aStarText.setFillColor(sf::Color::White);
+    aStarText.setPosition(aStarButton.getPosition().x + (aStarButton.getSize().x - aStarText.getLocalBounds().width) / 2,
+                          aStarButton.getPosition().y + (aStarButton.getSize().y - aStarText.getLocalBounds().height) / 2);
+
+    sf::RectangleShape findPathButton(sf::Vector2f(200, 50));
+    findPathButton.setFillColor(sf::Color::Black);
+    findPathButton.setPosition(250, 400);
+
+    sf::Text findPathText("Find Path", font, 24);
+    findPathText.setFillColor(sf::Color::White);
+    findPathText.setPosition(findPathButton.getPosition().x + (findPathButton.getSize().x - findPathText.getLocalBounds().width) / 2,
+                             findPathButton.getPosition().y + (findPathButton.getSize().y - findPathText.getLocalBounds().height) / 2);
+
 
     title.setPosition(150, 50);
     song1Label.setPosition(50, 150);
@@ -111,11 +136,23 @@ int main(int argc, char **argv) {
                     isSong1Active = inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y);
             }
         }
+        sf::Texture backgroundTexture;
+        if (!backgroundTexture.loadFromFile("/Users/pamelavishka/Downloads/disco.jpg")) {
+            cout << "error" << endl;
+        }
+        sf::Sprite background(backgroundTexture);
+        sf::FloatRect bounds = background.getLocalBounds();
+        //ensure that the disco image fits correctly
+        float scale_factor = 0.7f;
+        background.setScale(scale_factor, scale_factor);
+        background.setOrigin(bounds.width / 2, bounds.height / 2); // Set the origin to the center
+        background.setPosition(window.getSize().x / 2, window.getSize().y / 2); // Center the sprite
 
         // Render
-        window.clear(sf::Color::Black);
+        window.clear();
 
         // Draw UI elements
+        window.draw(background);
         window.draw(title);
         window.draw(song1Label);
         window.draw(song2Label);
@@ -134,8 +171,11 @@ int main(int argc, char **argv) {
 
         // Draw the "Find Path" button and result
         window.draw(dijkstraButton);
+        window.draw(dijkstraText);
         window.draw(aStarButton);
+        window.draw(aStarText);
         window.draw(findPathButton);
+        window.draw(findPathText);
         window.draw(resultText);
 
         window.display();

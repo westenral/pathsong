@@ -10,12 +10,6 @@ add_executable(pathsong src/main.cpp
         src/song.cpp
         src/songgraph.cpp)
 
-set(SFML_STATIC_LIBRARIES TRUE)
-set(SFML_DIR C:/SFML/lib/cmake/SFML)
 find_package(SFML COMPONENTS system window graphics audio network REQUIRED)
-
-include_directories(C:SFML/include/SFML)
 target_link_libraries(pathsong sfml-system sfml-window sfml-graphics sfml-audio)
-
-
 
