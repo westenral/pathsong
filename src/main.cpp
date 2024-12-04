@@ -1,13 +1,15 @@
 #include "../include/songgraph.h"
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <iomanip>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 
 int main(int argc, char **argv) {
     // Create the SFML window
-    sf::RenderWindow window(sf::VideoMode(600, 600), "PathSong Finder");
+    sf::RenderWindow window(sf::VideoMode(1900, 900), "PathSong Finder");
 
     // Load the icon image file (e.g., "icon.png")
     sf::Image icon;
@@ -30,43 +32,31 @@ int main(int argc, char **argv) {
     sf::Text song1Label("Song 1:", font, 20);
     sf::Text song2Label("Song 2:", font, 20);
     sf::Text resultText("", font, 18);
-
-    sf::RectangleShape dijkstraButton(sf::Vector2f(200, 50));
-    dijkstraButton.setFillColor(sf::Color::Black);
-    dijkstraButton.setPosition(150, 300);
-
     sf::Text dijkstraText("Dijkstra's", font, 24);
-    dijkstraText.setFillColor(sf::Color::White);
-    dijkstraText.setPosition(dijkstraButton.getPosition().x + (dijkstraButton.getSize().x - dijkstraText.getLocalBounds().width) / 2,
-                             dijkstraButton.getPosition().y + (dijkstraButton.getSize().y - dijkstraText.getLocalBounds().height) / 2);
-
-    sf::RectangleShape aStarButton(sf::Vector2f(200, 50));
-    aStarButton.setFillColor(sf::Color::Black);
-    aStarButton.setPosition(350, 300);
-
     sf::Text aStarText("A*", font, 24);
-    aStarText.setFillColor(sf::Color::White);
-    aStarText.setPosition(aStarButton.getPosition().x + (aStarButton.getSize().x - aStarText.getLocalBounds().width) / 2,
-                          aStarButton.getPosition().y + (aStarButton.getSize().y - aStarText.getLocalBounds().height) / 2);
-
-    sf::RectangleShape findPathButton(sf::Vector2f(200, 50));
-    findPathButton.setFillColor(sf::Color::Black);
-    findPathButton.setPosition(250, 400);
-
-    sf::Text findPathText("Find Path", font, 24);
-    findPathText.setFillColor(sf::Color::White);
-    findPathText.setPosition(findPathButton.getPosition().x + (findPathButton.getSize().x - findPathText.getLocalBounds().width) / 2,
-                             findPathButton.getPosition().y + (findPathButton.getSize().y - findPathText.getLocalBounds().height) / 2);
-
+    sf::Text findPathText("Find Path!", font, 24);
 
     title.setPosition(150, 50);
     song1Label.setPosition(50, 150);
     song2Label.setPosition(50, 200);
-    dijkstraButton.setPosition(150, 300);
-    aStarButton.setPosition(350, 300);
-    findPathButton.setPosition(250, 400);
-    resultText.setPosition(50, 450);
+    dijkstraText.setPosition(150, 305);
+    aStarText.setPosition(400, 305);
+    findPathText.setPosition(250, 400);
 
+    dijkstraText.setFillColor(sf::Color::White);
+    sf::RectangleShape dijkstraButton(sf::Vector2f(150, 50));
+    dijkstraButton.setFillColor(sf::Color::Magenta);
+    dijkstraButton.setPosition(125, 300);
+
+    aStarText.setFillColor(sf::Color::White);
+    sf::RectangleShape aStarButton(sf::Vector2f(150, 50));
+    aStarButton.setFillColor(sf::Color::Magenta);
+    aStarButton.setPosition(335, 300);
+
+    findPathText.setFillColor(sf::Color::White);
+    sf::RectangleShape findPathButton(sf::Vector2f(200, 50));
+    findPathButton.setFillColor(sf::Color::Magenta);
+    findPathButton.setPosition(200, 395);
 
     // Input fields (white rectangles to show text input areas)
     sf::RectangleShape inputBox1(sf::Vector2f(400, 30));
@@ -82,6 +72,35 @@ int main(int argc, char **argv) {
 
     // Create a SongGraph instance
     SongGraph songgraph("../pop_songs.csv");
+
+    // Load GIF frames (pre-extracted as PNG files)
+    std::vector<sf::Texture> gifFrames;
+
+    for (int i = 0; i < 46; ++i) {  // Loop from frame_00 to frame_45
+        sf::Texture texture;
+        std::ostringstream filename;
+        filename << "../include/discoballGIF/frame_"
+                 << std::setw(2) << std::setfill('0') << i  // Ensures 2-digit formatting
+                 << "_delay-0.06s.png";
+
+        if (!texture.loadFromFile(filename.str())) {
+            std::cerr << "Error loading frame: " << filename.str() << "\n";
+            return -1;
+        }
+
+        gifFrames.push_back(texture);
+    }
+
+    sf::Sprite backgroundSprite;
+    size_t currentFrame = 0;
+    float frameTime = 0.1f; // Time per frame in seconds
+    float elapsedTime = 0.f;
+    sf::Clock clock;
+
+    // Scroll position for the result text
+    int scrollPos = 0;
+    const int scrollStep = 2;  // Number of lines to scroll per step
+    const int maxScroll = 200; // Adjust this depending on the length of your results
 
     // Main loop
     while (window.isOpen()) {
@@ -118,6 +137,10 @@ int main(int argc, char **argv) {
                     // Find the path between the songs
                     auto path = songgraph.get_path(song1, song2);
 
+                    // Declare a variable to track the scroll position
+                    float scrollOffset = 0.0f;
+                    float scrollSpeed = 50.0f; // Adjust the speed of scrolling
+
                     if (path.empty()) {
                         resultText.setString("No path found. Check spelling.");
                     } else {
@@ -126,130 +149,134 @@ int main(int argc, char **argv) {
                             result += song + " -> ";
                         }
                         result = result.substr(0, result.size() - 4);  // Remove last " -> "
-                        resultText.setString(result);
+
+                        // Create an sf::Text object for calculating text bounds
+                        sf::Text tempText(result, font, 18);
+
+                        // Manually wrap text if it exceeds the screen width
+                        sf::FloatRect bounds = tempText.getLocalBounds();
+                        if (bounds.width > window.getSize().x - 100) {
+                            // Wrap the text manually
+                            std::string wrappedText = "";
+                            std::string currentLine = "";
+                            std::istringstream stream(result);
+                            std::string word;
+
+                            while (stream >> word) {
+                                // Check if the current line width plus the next word exceeds the width of the window
+                                if ((currentLine + " " + word).size() * 9 < window.getSize().x - 100) { // Approximate average width of characters
+                                    currentLine += " " + word;
+                                } else {
+                                    wrappedText += currentLine + "\n";
+                                    currentLine = word;
+                                }
+                            }
+                            wrappedText += currentLine; // Add the last line
+
+                            resultText.setString(wrappedText);
+                        } else {
+                            // If the text fits, just set the result text
+                            resultText.setString(result);
+                        }
+
+                        // Adjust the character size and position of the result text
+                        resultText.setCharacterSize(18);  // Adjust the size of the text to fit the screen
+
+                        // Set the starting position near the center horizontally
+                        float resultTextWidth = resultText.getLocalBounds().width;
+                        float centerX = (window.getSize().x - resultTextWidth) / 2;
+
+                        centerX += 450; // Shift 100 pixels to the right (use negative value for left shift)
+
+                        resultText.setPosition(centerX, 25 - scrollOffset);  // Use the desired Y position
+                        scrollOffset += scrollSpeed;
+
+                        // If the text has scrolled too far, reset to start position
+                        if (scrollOffset > resultText.getLocalBounds().height) {
+                            scrollOffset = 0.0f; // Reset the scroll when it goes out of the window
+                        }
                     }
                 }
 
-                // Switch focus between input boxes
-                isSong1Active = inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y);
-                if (!isSong1Active)
-                    isSong1Active = inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y);
+                // Switch focus between input boxes by increasing the clickable area
+                if (inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                    isSong1Active = true;
+                } else if (inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                    isSong1Active = false;
+                }
+            }
+
+            // Handle scrolling
+            if (event.type == sf::Event::MouseWheelScrolled) {
+                if (event.mouseWheelScroll.delta > 0) {
+                    scrollPos -= scrollStep;  // Scroll up
+                } else if (event.mouseWheelScroll.delta < 0) {
+                    scrollPos += scrollStep;  // Scroll down
+                }
+
+                // Make sure the scroll position is within bounds
+                if (scrollPos < 0) {
+                    scrollPos = 0;
+                }
+                if (scrollPos > maxScroll) {
+                    scrollPos = maxScroll;
+                }
             }
         }
-        sf::Texture backgroundTexture;
-        if (!backgroundTexture.loadFromFile("/Users/pamelavishka/Downloads/disco.jpg")) {
-            cout << "error" << endl;
-        }
-        sf::Sprite background(backgroundTexture);
-        sf::FloatRect bounds = background.getLocalBounds();
-        //ensure that the disco image fits correctly
-        float scale_factor = 0.7f;
-        background.setScale(scale_factor, scale_factor);
-        background.setOrigin(bounds.width / 2, bounds.height / 2); // Set the origin to the center
-        background.setPosition(window.getSize().x / 2, window.getSize().y / 2); // Center the sprite
 
+        // Update the GIF background
+        elapsedTime += clock.restart().asSeconds();
+        if (elapsedTime >= frameTime) {
+            elapsedTime = 0.f;
+            currentFrame = (currentFrame + 1) % gifFrames.size();
+            backgroundSprite.setTexture(gifFrames[currentFrame]);
+
+            // Scale the current frame to fit the window
+            float scaleX = static_cast<float>(window.getSize().x) / backgroundSprite.getTexture()->getSize().x;
+            float scaleY = static_cast<float>(window.getSize().y) / backgroundSprite.getTexture()->getSize().y;
+            backgroundSprite.setScale(scaleX, scaleY);
+            backgroundSprite.setPosition(0, 0); // Align to top-left of the window
+        }
         // Render
         window.clear();
 
-        // Draw UI elements
-        window.draw(background);
+        window.draw(backgroundSprite);
         window.draw(title);
         window.draw(song1Label);
         window.draw(song2Label);
         window.draw(inputBox1);
         window.draw(inputBox2);
 
-        // Create text objects to display current input
+        // Draw text for user input inside the boxes
         sf::Text input1Text(song1, font, 20);
         sf::Text input2Text(song2, font, 20);
-        input1Text.setPosition(160, 50); // Positioning the text inside the box
-        input2Text.setPosition(160, 120); // Positioning the text inside the box
+        input1Text.setFillColor(sf::Color::Black);
+        input2Text.setFillColor(sf::Color::Black);
+        input1Text.setPosition(inputBox1.getPosition().x + 5, inputBox1.getPosition().y + 5);
+        input2Text.setPosition(inputBox2.getPosition().x + 5, inputBox2.getPosition().y + 5);
 
-        // Draw text for user input inside the boxes
         window.draw(input1Text);
         window.draw(input2Text);
 
-        // Draw the "Find Path" button and result
         window.draw(dijkstraButton);
         window.draw(dijkstraText);
         window.draw(aStarButton);
         window.draw(aStarText);
         window.draw(findPathButton);
         window.draw(findPathText);
-        window.draw(resultText);
+
+        // Apply scroll offset to the result text
+        sf::Text visibleResultText(resultText.getString(), font, 18);
+        visibleResultText.setPosition(resultText.getPosition().x, resultText.getPosition().y - scrollPos);
+        window.draw(visibleResultText);
 
         window.display();
     }
-
-    // Code for command-line argument parsing (optional)
-    std::string song1Cmd = song1;
-    std::string song2Cmd = song2;
-
-    // Use command-line arguments if provided
-    if (argc == 3) {
-        song1Cmd = argv[1];
-        song2Cmd = argv[2];
-    } else if (argc <= 1) {
-        std::cout << "Song 1 name: ";
-        std::getline(std::cin, song1Cmd);
-        std::cout << "Song 2 name: ";
-        std::getline(std::cin, song2Cmd);
-    } else {
-        std::cout << "Invalid argument count. Valid usage:\n"
-                  << "pathsong\n"
-                  << "pathsong <source_song_name> <target_song_name>\n";
-        return 1;
-    }
-
-    // Get the path from the SongGraph
-    auto path = songgraph.get_path(song1Cmd, song2Cmd);
-
-    if (path.empty()) {
-        std::cout << "No path found -- make sure song titles are spelled correctly!\n";
-    } else {
-        for (const auto &songname : path) {
-            std::cout << songname << std::endl;
-        }
-    }
-
-
-    /*
-    // Test CSV data points
-    vector<string> csv_data = {
-            "0,5SuOikwiRyPMVoIQDJUgSV,Gen Hoshino,Comedy,Comedy,73,230666,False,0.676,0.461,1,-6.746,0,0.143,0.0322,1.01e-06,0.358,0.715,87.917,4,acoustic",
-            "1,4qPNDBW1i3p13qLCt0Ki3A,Ben Woodward,Ghost (Acoustic),Ghost - Acoustic,55,149610,False,0.42,0.166,1,-17.235,1,0.0763,0.924,5.56e-06,0.101,0.267,77.489,4,acoustic",
-            "2,1iJBSr7s7jYXzM8EGcbK5b,Ingrid Michaelson;ZAYN,To Begin Again,To Begin Again,57,210826,False,0.438,0.359,0,-9.734,1,0.0557,0.21,0.0,0.117,0.12,76.332,4,acoustic",
-            "3,6lfxq3CG4xtTiEg7opyCyx,Kina Grannis,Crazy Rich Asians (Original Motion Picture Soundtrack),Can't Help Falling In Love,71,201933,False,0.266,0.0596,0,-18.515,1,0.0363,0.905,7.07e-05,0.132,0.143,181.74,3,acoustic"
-    };
-
-    // Process each CSV entry
-    for (size_t i = 0; i < csv_data.size(); ++i) {
-        Song song;
-        song.from_csv_entry(csv_data[i]);
-
-        // Output parsed fields
-        cout << "Song ID" << i << ":" << endl;
-        cout << "Name: " << song.name << endl;
-        cout << "Energy: " << song.energy << endl;
-        cout << "Key: " << song.key << endl;
-        cout << "Mode: " << song.mode << endl;
-        cout << "Genre: " << song.genre << endl;
-        cout << endl;
-    }
-    */
-
-//    std::string song1, song2;
+    /*  // command line functionality
+    std::string song1, song2;
 
     // use command line arguments as input, otherwise prompt the user
     if (argc == 3) {
-        // lets narrow down your mashup math!
-        // categories: genre, key, mode
-        // take in user input for first one
-        // anything else? ; take in user input 1 more time after this in case they want to narrow down w each category
-        // string genre: w/ examples: anime, afrobeats, blues, etc. std::getline(std::cin, genre);  // would require pre populated category maps
-        // std::getline(std::cin, key);
-        // std::getline(std::cin, mode);
-
         song1 = argv[1];
         song2 = argv[2];
     } else if (argc <= 1) {
@@ -260,23 +287,21 @@ int main(int argc, char **argv) {
         std::getline(std::cin, song2);
     } else {
         std::cout << "Invalid argument count. Valid usage:\n"
-            << "pathsong\n"
-            << "pathsong <source_song_name> <target_song_name>\n";
+                  << "pathsong\n"
+                  << "pathsong <source_song_name> <target_song_name>\n";
         return 1;
     }
 
     // SongGraph songgraph("larger_sample_songs.csv");
-    // probably add a helper that narrows dataset down by whatever category -> use to create new csv that we can use to create songgraph
-//    SongGraph songgraph("../pop_songs.csv");
-//    auto path = songgraph.get_path(song1, song2);
-
+    SongGraph songgraph("pop_songs.csv");
+    auto path = songgraph.get_path(song1, song2);
     if (path.empty()) {
         std::cout << "No path found -- make sure song titles are spelled correctly!\n";
     }
 
     for (const auto &songname : path) {
         std::cout << songname << std::endl;
-    }
-    
+    } */
+
     return 0;
 }
