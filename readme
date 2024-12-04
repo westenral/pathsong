@@ -3,7 +3,7 @@ Team Name: LPP
 Project Name: PathSong
 Dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset/data
 
-We will be comparing the algorithms: dijkstra and prims
+We will be comparing the algorithms: Dijkstra's Algorithm and A* Algorithm
 These algorithms will be compared given the task of traversing a graph.
 The goal of these traversals is to highlight a path (edge) that connects two songs
 chosen by the user with the aim of creating a smooth transition between songs that can
