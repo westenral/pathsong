@@ -3,11 +3,53 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <thread>
+#include <atomic>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 
-int main(int argc, char **argv) {
+std::atomic<size_t> currentFrame(0); // Shared frame index
+std::atomic<bool> isRunning(true);  // Control flag for the background thread
+
+// Function to update the background animation
+void animateBackground(const std::vector<sf::Texture>& gifFrames, float frameTime) {
+    sf::Clock frameClock;
+
+    while (isRunning) {
+        if (frameClock.getElapsedTime().asSeconds() >= frameTime) {
+            frameClock.restart();
+            currentFrame = (currentFrame + 1) % gifFrames.size(); // Loop through frames
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Prevent high CPU usage
+    }
+}
+
+// Helper function for wrapping text within bounds
+std::string wrapText(const std::string& text, sf::Font& font, unsigned characterSize, float maxWidth) {
+    std::istringstream wordStream(text);
+    std::string word, result, currentLine;
+    float spaceWidth = font.getGlyph(' ', characterSize, false).advance;
+
+    while (wordStream >> word) {
+        float lineWidth = font.getGlyph(currentLine[0], characterSize, false).advance * currentLine.size();
+        float wordWidth = font.getGlyph(word[0], characterSize, false).advance * word.size();
+
+        if (lineWidth + wordWidth + spaceWidth > maxWidth) {
+            result += currentLine + '\n';
+            currentLine.clear();
+        }
+        if (!currentLine.empty()) {
+            currentLine += ' ';
+        }
+        currentLine += word;
+    }
+
+    result += currentLine; // Add the last line
+    return result;
+}
+
+int main(int argc, char** argv) {
     // Create the SFML window
     sf::RenderWindow window(sf::VideoMode(1900, 900), "PathSong Finder");
 
@@ -43,19 +85,16 @@ int main(int argc, char **argv) {
     aStarText.setPosition(400, 305);
     findPathText.setPosition(250, 400);
 
-    dijkstraText.setFillColor(sf::Color::White);
     sf::RectangleShape dijkstraButton(sf::Vector2f(150, 50));
-    dijkstraButton.setFillColor(sf::Color::Magenta);
-    dijkstraButton.setPosition(125, 300);
-
-    aStarText.setFillColor(sf::Color::White);
     sf::RectangleShape aStarButton(sf::Vector2f(150, 50));
-    aStarButton.setFillColor(sf::Color::Magenta);
-    aStarButton.setPosition(335, 300);
-
-    findPathText.setFillColor(sf::Color::White);
     sf::RectangleShape findPathButton(sf::Vector2f(200, 50));
+
+    dijkstraButton.setFillColor(sf::Color::Magenta);
+    aStarButton.setFillColor(sf::Color::Magenta);
     findPathButton.setFillColor(sf::Color::Magenta);
+
+    dijkstraButton.setPosition(125, 300);
+    aStarButton.setPosition(335, 300);
     findPathButton.setPosition(200, 395);
 
     // Input fields (white rectangles to show text input areas)
@@ -75,51 +114,46 @@ int main(int argc, char **argv) {
 
     // Load GIF frames (pre-extracted as PNG files)
     std::vector<sf::Texture> gifFrames;
-
     for (int i = 0; i < 46; ++i) {  // Loop from frame_00 to frame_45
         sf::Texture texture;
         std::ostringstream filename;
         filename << "../include/discoballGIF/frame_"
-                 << std::setw(2) << std::setfill('0') << i  // Ensures 2-digit formatting
+                 << std::setw(2) << std::setfill('0') << i
                  << "_delay-0.06s.png";
 
         if (!texture.loadFromFile(filename.str())) {
             std::cerr << "Error loading frame: " << filename.str() << "\n";
             return -1;
         }
-
         gifFrames.push_back(texture);
     }
 
+    // Start the animation thread
+    std::thread backgroundThread(animateBackground, std::ref(gifFrames), 0.06f);
+
     sf::Sprite backgroundSprite;
-    size_t currentFrame = 0;
-    float frameTime = 0.1f; // Time per frame in seconds
-    float elapsedTime = 0.f;
     sf::Clock clock;
 
-    // Scroll position for the result text
     int scrollPos = 0;
-    const int scrollStep = 30;  // Number of lines to scroll per step
-    const int maxScroll = 200; // Adjust this depending on the length of your results
+    const int scrollStep = 20;
+    const int maxScroll = 200;
 
-    // Main loop
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
+                isRunning = false;
+                backgroundThread.join();
                 window.close();
+            }
 
-            // Text input handling
             if (event.type == sf::Event::TextEntered) {
-                // Handle backspace to delete last character
                 if (event.text.unicode == '\b') {
                     if (isSong1Active && !song1.empty())
                         song1.pop_back();
                     else if (!isSong1Active && !song2.empty())
                         song2.pop_back();
-                }
-                    // Handle regular characters
-                else if (event.text.unicode < 128) {
+                } else if (event.text.unicode < 128) {
                     char c = static_cast<char>(event.text.unicode);
                     if (isSong1Active)
                         song1 += c;
@@ -128,19 +162,11 @@ int main(int argc, char **argv) {
                 }
             }
 
-            // Mouse interaction for the Find Path button
             if (event.type == sf::Event::MouseButtonPressed) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
-                // Check if the "Find Path" button was clicked
                 if (findPathButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    // Find the path between the songs
                     auto path = songgraph.get_path(song1, song2);
-
-                    // Declare a variable to track the scroll position
-                    float scrollOffset = 0.0f;
-                    float scrollSpeed = 50.0f; // Adjust the speed of scrolling
-
                     if (path.empty()) {
                         resultText.setString("No path found. Check spelling.");
                     } else {
@@ -148,57 +174,12 @@ int main(int argc, char **argv) {
                         for (const auto& song : path) {
                             result += song + " -> ";
                         }
-                        result = result.substr(0, result.size() - 4);  // Remove last " -> "
-
-                        // Create an sf::Text object for calculating text bounds
-                        sf::Text tempText(result, font, 18);
-
-                        // Manually wrap text if it exceeds the screen width
-                        sf::FloatRect bounds = tempText.getLocalBounds();
-                        if (bounds.width > window.getSize().x - 100) {
-                            // Wrap the text manually
-                            std::string wrappedText = "";
-                            std::string currentLine = "";
-                            std::istringstream stream(result);
-                            std::string word;
-
-                            while (stream >> word) {
-                                // Check if the current line width plus the next word exceeds the width of the window
-                                if ((currentLine + " " + word).size() * 9 < window.getSize().x - 100) { // Approximate average width of characters
-                                    currentLine += " " + word;
-                                } else {
-                                    wrappedText += currentLine + "\n";
-                                    currentLine = word;
-                                }
-                            }
-                            wrappedText += currentLine; // Add the last line
-
-                            resultText.setString(wrappedText);
-                        } else {
-                            // If the text fits, just set the result text
-                            resultText.setString(result);
-                        }
-
-                        // Adjust the character size and position of the result text
-                        resultText.setCharacterSize(18);  // Adjust the size of the text to fit the screen
-
-                        // Set the starting position near the center horizontally
-                        float resultTextWidth = resultText.getLocalBounds().width;
-                        float centerX = (window.getSize().x - resultTextWidth) / 2;
-
-                        centerX += 450; // Shift 100 pixels to the right (use negative value for left shift)
-
-                        resultText.setPosition(centerX, 25 - scrollOffset);  // Use the desired Y position
-                        scrollOffset += scrollSpeed;
-
-                        // If the text has scrolled too far, reset to start position
-                        if (scrollOffset > resultText.getLocalBounds().height) {
-                            scrollOffset = 0.0f; // Reset the scroll when it goes out of the window
-                        }
+                        result = result.substr(0, result.size() - 4); // Remove trailing arrow
+                        result = wrapText(result, font, 18, window.getSize().x - 100); // Wrap text to fit window
+                        resultText.setString(result);
                     }
                 }
 
-                // Switch focus between input boxes by increasing the clickable area
                 if (inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
                     isSong1Active = true;
                 } else if (inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -206,48 +187,27 @@ int main(int argc, char **argv) {
                 }
             }
 
-            // Handle scrolling
             if (event.type == sf::Event::MouseWheelScrolled) {
-                if (event.mouseWheelScroll.delta > 0) {
-                    scrollPos -= scrollStep;  // Scroll up
-                } else if (event.mouseWheelScroll.delta < 0) {
-                    scrollPos += scrollStep;  // Scroll down
-                }
+                float maxScroll = std::max(0.f, resultText.getLocalBounds().height - (window.getSize().y / 2));
+                scrollPos = std::clamp(scrollPos + (event.mouseWheelScroll.delta > 0 ? -scrollStep : scrollStep), 0, static_cast<int>(maxScroll));
 
-                // Make sure the scroll position is within bounds
-                if (scrollPos < 0) {
-                    scrollPos = 0;
-                }
-                if (scrollPos > maxScroll) {
-                    scrollPos = maxScroll;
-                }
             }
         }
 
-        // Update the GIF background
-        elapsedTime += clock.restart().asSeconds();
-        if (elapsedTime >= frameTime) {
-            elapsedTime = 0.f;
-            currentFrame = (currentFrame + 1) % gifFrames.size();
-            backgroundSprite.setTexture(gifFrames[currentFrame]);
-
-            // Scale the current frame to fit the window
-            float scaleX = static_cast<float>(window.getSize().x) / backgroundSprite.getTexture()->getSize().x;
-            float scaleY = static_cast<float>(window.getSize().y) / backgroundSprite.getTexture()->getSize().y;
-            backgroundSprite.setScale(scaleX, scaleY);
-            backgroundSprite.setPosition(0, 0); // Align to top-left of the window
-        }
-        // Render
         window.clear();
 
+        backgroundSprite.setTexture(gifFrames[currentFrame]);
+        float scaleX = static_cast<float>(window.getSize().x) / backgroundSprite.getTexture()->getSize().x;
+        float scaleY = static_cast<float>(window.getSize().y) / backgroundSprite.getTexture()->getSize().y;
+        backgroundSprite.setScale(scaleX, scaleY);
         window.draw(backgroundSprite);
+
         window.draw(title);
         window.draw(song1Label);
         window.draw(song2Label);
         window.draw(inputBox1);
         window.draw(inputBox2);
 
-        // Draw text for user input inside the boxes
         sf::Text input1Text(song1, font, 20);
         sf::Text input2Text(song2, font, 20);
         input1Text.setFillColor(sf::Color::Black);
@@ -265,13 +225,13 @@ int main(int argc, char **argv) {
         window.draw(findPathButton);
         window.draw(findPathText);
 
-        // Apply scroll offset to the result text
-        sf::Text visibleResultText(resultText.getString(), font, 18);
-        visibleResultText.setPosition(resultText.getPosition().x, resultText.getPosition().y - scrollPos);
-        window.draw(visibleResultText);
+        resultText.setPosition(570, 25 - scrollPos);               // Center vertically with scroll
+
+        window.draw(resultText);
 
         window.display();
     }
+
     /*  // command line functionality
     std::string song1, song2;
 
