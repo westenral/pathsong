@@ -105,7 +105,7 @@ std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &so
         return {};
     }
     if (cli) {
-      std::clog << "Found song \"" << song1 << "\" \tGenre: "
+      std::clog << "Found song \"" << song1 << "\"\tGenre: "
                 << songs[song1_id].genre << " \tKey: "
                 << keylookup[songs[song1_id].key] << " "
                 << (songs[song1_id].mode ? "major" : "minor") << "\n";
@@ -116,7 +116,7 @@ std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &so
         return {};
     }
     if (cli) {
-      std::clog << "Found song \"" << song2 << "\" \tGenre: "
+      std::clog << "Found song \"" << song2 << "\"\tGenre: "
                 << songs[song2_id].genre << " \tKey: "
                 << keylookup[songs[song2_id].key] << " "
                 << (songs[song2_id].mode ? "major" : "minor") << "\n";
@@ -239,6 +239,9 @@ std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &so
     }
 
     // traverse internal graph to find shortest path
+    if (cli) {
+        std::clog << "Using " << (use_astar ? "A*" : "Djikstra's") << " to calculate path\n";
+    }
     auto path_ids = use_astar ? get_path_astar(song1_id, song2_id)
                               : get_path(song1_id, song2_id);
 
@@ -294,6 +297,9 @@ std::vector<u32> SongGraph::get_path_astar(u32 song1, u32 song2) {
             std::clog << "\rChecked " << songs_checked++ << " songs                      \r";
         }
         // take the next optimal path
+        if (paths.empty()) { 
+            return {};
+        }
         auto path = paths.top();
         paths.pop();
 
@@ -307,6 +313,7 @@ std::vector<u32> SongGraph::get_path_astar(u32 song1, u32 song2) {
 
         // add path.to's neighbors into queue
         for (const auto &[next, weight] : weight[path.to]) {
+            if (visited[next]) { continue; }
             paths.push({path.dist + diff(path.from, path.to), diff(next, song2), path.to, next});
         }
     }
