@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <fstream>
 #include <queue>
+#include <set>
 using namespace std;
 
 namespace {
@@ -37,6 +38,7 @@ SongGraph::SongGraph(std::string song_csv) {
     std::getline(data, entry);
 
     while (!data.eof()) {
+        std::getline(data, entry);
         Song song;
         song.from_csv_entry(entry);
         songs.push_back(song);
@@ -48,14 +50,51 @@ SongGraph::SongGraph(std::string song_csv) {
         }
         keyMap[key].push_back(songs.size()-1);
         u32 mode = song.get_mode();
+        if(modeMap.size() <= mode){
+            modeMap.resize(mode+1);
+        }
         modeMap[mode].push_back(songs.size()-1);
-
     }
 }
 
 std::vector<std::string> SongGraph::get_path(std::string &song1, std::string &song2) {
     u32 song1_id = find_song_id(song1);
     u32 song2_id = find_song_id(song2);
+
+    std::string g1 = songs[song1_id].genre;
+    u32 k1 = songs[song1_id].key;
+    std::string g2 = songs[song2_id].genre;
+    u32 k2 = songs[song2_id].key;
+
+    // eliminate non-common songs
+    std::set<u32> songs_to_keep;
+    auto songs_to_keep_dupe = get_songs_with_genre(g1);
+    for (u32 songid : get_songs_with_key(k1)) {
+        songs_to_keep_dupe.push_back(songid);
+    }
+    for (u32 songid : get_songs_with_genre(g2)) {
+        songs_to_keep_dupe.push_back(songid);
+    }
+    for (u32 songid : get_songs_with_key(k2)) {
+        songs_to_keep_dupe.push_back(songid);
+    }
+
+    for (u32 songid : songs_to_keep_dupe) {
+        songs_to_keep.insert(songid);
+    }
+
+    const auto songscopy = songs;
+    songs.clear();
+    songs.reserve(songs_to_keep.size());
+    for (u32 songid : songs_to_keep) {
+        songs.push_back(songscopy[songid]);
+    }
+
+
+    song1_id = find_song_id(song1);
+    song2_id = find_song_id(song2);
+
+    // std::cout << songs.size() << '\n';
 
     if (song1_id == songs.size() || song2_id == songs.size()) {
         return {};
@@ -81,7 +120,7 @@ void SongGraph::insert_weight(u32 from, u32 to, u8 weight) {
 }
 
 std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
-//    return get_path_old(song1, song2);
+   return get_path_old(song1, song2);
 
     std::vector<u32> dist(songs.size(), 0xffffffff);
     dist[song1] = 0;
@@ -95,7 +134,9 @@ std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
         dist[to] = weight;
     }
 
+    u32 i = 0;
     while (!visited[song2]) {
+        std::cout << i++ << '\n';
         auto path = paths.top();
         paths.pop();
 
@@ -118,6 +159,7 @@ std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
             u32 difference = dist[path.to] + 255 - weight;
         
             if (dist[to] < difference) { continue; }
+
             paths.push({difference, path.to, to});
             dist[to] = dist[path.to] + weight;
         }
@@ -168,10 +210,10 @@ std::vector<u32> SongGraph::get_path_old(u32 song1, u32 song2) {
         paths.push({(u32)255 - weights[i], song1, i});
     }
 
-    u32 steps = 0;
+    // u32 steps = 0;
     // as long as we haven't visited song2 yet, keep searching
     while (!visited[song2]) {
-        std::cout << steps++ << '\n';
+        // std::cout << steps++ << '\n';
         // take the next edge
         auto path = paths.top();
         paths.pop();

@@ -23,7 +23,7 @@ private:
     std::vector<vector<u32>> modeMap;  // 0 minor, 1 major
 
     // don't write directly, use `insert_weight()`
-    std::vector<std::unordered_map<u32, u8>> weight;
+    std::unordered_map<u32, std::unordered_map<u32, u8>> weight;
 
     void insert_weight(u32 from, u32 to, u8 weight);
     

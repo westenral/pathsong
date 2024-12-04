@@ -57,8 +57,8 @@ u8 Song::similarity(Song &rhs) {  // similarity sum / total similarity = similar
 
     const float genre_weight  = 1.0;
     const float energy_weight = 1.0;
-    const float key_weight    = 4.0;
-    const float mode_weight   = 4.0;
+    const float key_weight    = 1.0;
+    const float mode_weight   = 1.0;
         
     simScore = (u8)(((
         energySim  * energy_weight
