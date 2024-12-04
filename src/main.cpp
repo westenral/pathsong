@@ -137,6 +137,7 @@ int main(int argc, char **argv) {
     // Create a SongGraph instance
     SongGraph songgraph("../pop_songs.csv", false);
 
+
     // Load GIF frames (pre-extracted as PNG files)
     std::vector<sf::Texture> gifFrames;
     for (int i = 0; i < 46; ++i) {  // Loop from frame_00 to frame_45
@@ -163,6 +164,7 @@ int main(int argc, char **argv) {
     const int scrollStep = 20;
     const int maxScroll = 200;
 
+
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -187,6 +189,7 @@ int main(int argc, char **argv) {
                 }
             }
 
+
             if (event.type == sf::Event::MouseButtonPressed) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
@@ -205,16 +208,6 @@ int main(int argc, char **argv) {
                         resultText.setString(result);
                     }
                 }
-
-                if (inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    isSong1Active = true;
-                } else if (inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    isSong1Active = false;
-                }
-            }
-            if (event.type == sf::Event::MouseButtonPressed) {
-                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-
                 if (aStarButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
                     songgraph.use_astar = true;
                     auto path = songgraph.get_path(song1, song2);
@@ -230,12 +223,12 @@ int main(int argc, char **argv) {
                         resultText.setString(result);
                     }
                 }
-
                 if (inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
                     isSong1Active = true;
                 } else if (inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
                     isSong1Active = false;
                 }
+
             }
 
             if (event.type == sf::Event::MouseWheelScrolled) {
