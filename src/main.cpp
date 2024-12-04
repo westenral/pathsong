@@ -106,26 +106,21 @@ int main(int argc, char **argv) {
     sf::Text resultText("", font, 18);
     sf::Text dijkstraText("Dijkstra's", font, 24);
     sf::Text aStarText("A*", font, 24);
-    sf::Text findPathText("Find Path!", font, 24);
 
     title.setPosition(150, 50);
     song1Label.setPosition(50, 150);
     song2Label.setPosition(50, 200);
     dijkstraText.setPosition(150, 305);
     aStarText.setPosition(400, 305);
-    findPathText.setPosition(250, 400);
 
     sf::RectangleShape dijkstraButton(sf::Vector2f(150, 50));
     sf::RectangleShape aStarButton(sf::Vector2f(150, 50));
-    sf::RectangleShape findPathButton(sf::Vector2f(200, 50));
 
     dijkstraButton.setFillColor(sf::Color::Magenta);
     aStarButton.setFillColor(sf::Color::Magenta);
-    findPathButton.setFillColor(sf::Color::Magenta);
 
     dijkstraButton.setPosition(125, 300);
     aStarButton.setPosition(335, 300);
-    findPathButton.setPosition(200, 395);
 
     // Input fields (white rectangles to show text input areas)
     sf::RectangleShape inputBox1(sf::Vector2f(400, 30));
@@ -195,7 +190,33 @@ int main(int argc, char **argv) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
-                if (findPathButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                if (dijkstraButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                    songgraph.use_astar = false;
+                    auto path = songgraph.get_path(song1, song2);
+                    if (path.empty()) {
+                        resultText.setString("No path found. Check spelling.");
+                    } else {
+                        std::string result = "Path: ";
+                        for (const auto& song : path) {
+                            result += song + " -> ";
+                        }
+                        result = result.substr(0, result.size() - 4); // Remove trailing arrow
+                        result = wrapText(result, font, 18, window.getSize().x - 100); // Wrap text to fit window
+                        resultText.setString(result);
+                    }
+                }
+
+                if (inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                    isSong1Active = true;
+                } else if (inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                    isSong1Active = false;
+                }
+            }
+            if (event.type == sf::Event::MouseButtonPressed) {
+                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+
+                if (aStarButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                    songgraph.use_astar = true;
                     auto path = songgraph.get_path(song1, song2);
                     if (path.empty()) {
                         resultText.setString("No path found. Check spelling.");
@@ -252,8 +273,6 @@ int main(int argc, char **argv) {
         window.draw(dijkstraText);
         window.draw(aStarButton);
         window.draw(aStarText);
-        window.draw(findPathButton);
-        window.draw(findPathText);
 
         resultText.setPosition(570, 25 - scrollPos);               // Center vertically with scroll
 

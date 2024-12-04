@@ -443,7 +443,7 @@ std::vector<u32> SongGraph::get_path_old(u32 song1, u32 song2) {
     
     // priority queue of accessible edges, where the next edge to travel to is
     // the edge with least weight.
-    // the weights include the distance to the the vertex they are connected to
+    // the weights include the distance to the vertex they are connected to
     // just because an edge is in the queue doesn't mean it's optimal, but the
     // optimal path should always be chosen first
     std::priority_queue<Path, std::vector<Path>, std::less<Path>> paths;
