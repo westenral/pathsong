@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <fstream>
 #include <queue>
+using namespace std;
 
 namespace {
     struct Path {
@@ -26,16 +27,29 @@ namespace {
 
 SongGraph::SongGraph(std::string song_csv) {
     std::ifstream data(song_csv);
-
+    //check if file opened successfully
+    if(!data.is_open()){
+        cout << "unsuccessful :(" << song_csv << endl;
+        return;
+    }
     std::string entry;
     
     std::getline(data, entry);
 
     while (!data.eof()) {
-        std::getline(data, entry);
         Song song;
         song.from_csv_entry(entry);
         songs.push_back(song);
+        string genre = song.get_genre();
+        genreMap[genre].push_back(songs.size()-1);
+        u32 key = song.get_key();
+        if(keyMap.size() <= key){
+            keyMap.resize(key+1);
+        }
+        keyMap[key].push_back(songs.size()-1);
+        u32 mode = song.get_mode();
+        modeMap[mode].push_back(songs.size()-1);
+
     }
 }
 
