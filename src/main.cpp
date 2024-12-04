@@ -62,6 +62,9 @@ int main(int argc, char **argv) {
 
         // SongGraph songgraph("larger_sample_songs.csv", true);
         SongGraph songgraph("pop_songs.csv", true);
+        if (argc == 5 && std::string(argv[4]) == "-a") {
+            songgraph.use_astar = true;
+        }
         if (argc == 5 && std::string(argv[4]) == "-d") {
             songgraph.use_astar = false;
         }

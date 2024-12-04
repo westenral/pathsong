@@ -52,7 +52,7 @@ private:
 
 public:
 
-    bool use_astar = true;
+    bool use_astar = false;
     bool cli = false;
 
     SongGraph(std::string song_csv, bool cli);
