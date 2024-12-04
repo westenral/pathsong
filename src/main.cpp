@@ -49,7 +49,34 @@ std::string wrapText(const std::string& text, sf::Font& font, unsigned character
     return result;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
+    // check for command line interface
+    if (argc >= 4 && std::string(argv[1]) == "-cli") {
+
+        // command line functionality
+        std::string song1, song2;
+
+        // use command line arguments as input, otherwise prompt the user
+        song1 = argv[2];
+        song2 = argv[3];
+
+        // SongGraph songgraph("larger_sample_songs.csv", true);
+        SongGraph songgraph("pop_songs.csv", true);
+        if (argc == 5 && std::string(argv[4]) == "-d") {
+            songgraph.use_astar = false;
+        }
+        auto path = songgraph.get_path(song1, song2);
+        if (path.empty()) {
+            std::cerr << "No path found\n";
+        }
+
+        for (const auto &songname : path) {
+            std::cout << songname << std::endl;
+        }
+
+        return 0;
+    }
+
     // Create the SFML window
     sf::RenderWindow window(sf::VideoMode(1900, 900), "PathSong Finder");
 
@@ -110,7 +137,7 @@ int main(int argc, char** argv) {
     bool isSong1Active = true; // Flag to toggle between input boxes
 
     // Create a SongGraph instance
-    SongGraph songgraph("../pop_songs.csv");
+    SongGraph songgraph("../pop_songs.csv", false);
 
     // Load GIF frames (pre-extracted as PNG files)
     std::vector<sf::Texture> gifFrames;
@@ -231,37 +258,6 @@ int main(int argc, char** argv) {
 
         window.display();
     }
-
-    /*  // command line functionality
-    std::string song1, song2;
-
-    // use command line arguments as input, otherwise prompt the user
-    if (argc == 3) {
-        song1 = argv[1];
-        song2 = argv[2];
-    } else if (argc <= 1) {
-        std::cout << "Song 1 name: ";
-        std::getline(std::cin, song1);
-
-        std::cout << "Song 2 name: ";
-        std::getline(std::cin, song2);
-    } else {
-        std::cout << "Invalid argument count. Valid usage:\n"
-                  << "pathsong\n"
-                  << "pathsong <source_song_name> <target_song_name>\n";
-        return 1;
-    }
-
-    // SongGraph songgraph("larger_sample_songs.csv");
-    SongGraph songgraph("pop_songs.csv");
-    auto path = songgraph.get_path(song1, song2);
-    if (path.empty()) {
-        std::cout << "No path found -- make sure song titles are spelled correctly!\n";
-    }
-
-    for (const auto &songname : path) {
-        std::cout << songname << std::endl;
-    } */
 
     return 0;
 }
