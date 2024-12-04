@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
         }
         auto path = songgraph.get_path(song1, song2);
         if (path.empty()) {
-            std::cout << "No path found\n";
+            std::cerr << "No path found\n";
         }
 
         for (const auto &songname : path) {

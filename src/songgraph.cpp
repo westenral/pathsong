@@ -8,7 +8,7 @@
 #include <fstream>
 #include <iomanip>
 #include <queue>
-#include <set>
+
 using namespace std;
 
 namespace {
@@ -49,7 +49,7 @@ SongGraph::SongGraph(std::string song_csv, bool cli) {
     std::ifstream data(song_csv);
     //check if file opened successfully
     if(!data.is_open()){
-        cout << "unsuccessful :( " << song_csv << endl;
+        std::cerr << "unsuccessful :( " << song_csv << endl;
         return;
     }
     std::string entry;
@@ -269,7 +269,7 @@ std::vector<u32> SongGraph::get_path_astar(u32 song1, u32 song2) {
     // difference from the target song
     std::priority_queue<APath, std::vector<APath>, std::less<APath>> paths;
 
-    std::cout << songs.size() << ' ' << song1 << '\n';
+    // std::cout << songs.size() << ' ' << song1 << '\n';
     // every known distance and unsure possibly distance
     std::vector<u32> dist(songs.size(), 0xffffffff);
     dist[song1] = 0;
