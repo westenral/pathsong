@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 
     // Scroll position for the result text
     int scrollPos = 0;
-    const int scrollStep = 2;  // Number of lines to scroll per step
+    const int scrollStep = 30;  // Number of lines to scroll per step
     const int maxScroll = 200; // Adjust this depending on the length of your results
 
     // Main loop
