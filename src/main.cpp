@@ -18,14 +18,14 @@ int main(int argc, char **argv) {
         song1 = argv[2];
         song2 = argv[3];
 
-        // SongGraph songgraph("larger_sample_songs.csv");
-        SongGraph songgraph("pop_songs.csv");
+        // SongGraph songgraph("larger_sample_songs.csv", true);
+        SongGraph songgraph("pop_songs.csv", true);
         if (argc == 5 && std::string(argv[4]) == "-d") {
             songgraph.use_astar = false;
         }
         auto path = songgraph.get_path(song1, song2);
         if (path.empty()) {
-            std::cout << "No path found -- make sure song titles are spelled correctly!\n";
+            std::cout << "No path found\n";
         }
 
         for (const auto &songname : path) {
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
     bool isSong1Active = true; // Flag to toggle between input boxes
 
     // Create a SongGraph instance
-    SongGraph songgraph("../pop_songs.csv");
+    SongGraph songgraph("../pop_songs.csv", false);
 
     // Load GIF frames (pre-extracted as PNG files)
     std::vector<sf::Texture> gifFrames;
