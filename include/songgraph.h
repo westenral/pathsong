@@ -11,6 +11,7 @@
 
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class SongGraph {
@@ -21,6 +22,11 @@ private:
     std::vector<vector<u32>> keyMap;
     std::vector<vector<u32>> modeMap;  // 0 minor, 1 major
 
+    // don't write directly, use `insert_weight()`
+    std::vector<std::unordered_map<u32, u8>> weight;
+
+    void insert_weight(u32 from, u32 to, u8 weight);
+    
     std::vector<u32> get_songs_with_key(u32 key);
     std::vector<u32> get_songs_with_genre(std::string genre);
     std::vector<u32> get_songs_with_mode(u32 mode);
@@ -32,6 +38,7 @@ private:
     // return all adjacent edge weights
     std::vector<u8> edges(u32 v);
 
+    std::vector<u32> get_path_old(u32 song1, u32 song2);
     std::vector<u32> get_path(u32 song1, u32 song2);
 
     // find the song id based on its name
