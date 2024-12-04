@@ -7,7 +7,7 @@
 
 int main(int argc, char **argv) {
     // Create the SFML window
-    sf::RenderWindow window(sf::VideoMode(600, 400), "PathSong Finder");
+    sf::RenderWindow window(sf::VideoMode(600, 600), "PathSong Finder");
 
     // Load the icon image file (e.g., "icon.png")
     sf::Image icon;
@@ -26,21 +26,28 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    sf::Text title("Welcome to PathSong", font, 30);
     sf::Text song1Label("Song 1:", font, 20);
     sf::Text song2Label("Song 2:", font, 20);
     sf::Text resultText("", font, 18);
-    sf::Text findPathButton("Find Path", font, 22);
+    sf::Text findPathButton("Find Path!", font, 22);
+    sf::Text dijkstraButton("Dijkstra's", font, 20);
+    sf::Text aStarButton("A*", font, 20);
 
-    song1Label.setPosition(50, 50);
-    song2Label.setPosition(50, 120);
-    findPathButton.setPosition(250, 250);
-    resultText.setPosition(50, 300);
+    title.setPosition(150, 50);
+    song1Label.setPosition(50, 150);
+    song2Label.setPosition(50, 200);
+    dijkstraButton.setPosition(150, 300);
+    aStarButton.setPosition(350, 300);
+    findPathButton.setPosition(250, 400);
+    resultText.setPosition(50, 450);
+
 
     // Input fields (white rectangles to show text input areas)
     sf::RectangleShape inputBox1(sf::Vector2f(400, 30));
     sf::RectangleShape inputBox2(sf::Vector2f(400, 30));
-    inputBox1.setPosition(150, 50);
-    inputBox2.setPosition(150, 120);
+    inputBox1.setPosition(150, 150);
+    inputBox2.setPosition(150, 200);
     inputBox1.setFillColor(sf::Color::White);
     inputBox2.setFillColor(sf::Color::White);
 
@@ -109,6 +116,7 @@ int main(int argc, char **argv) {
         window.clear(sf::Color::Black);
 
         // Draw UI elements
+        window.draw(title);
         window.draw(song1Label);
         window.draw(song2Label);
         window.draw(inputBox1);
@@ -125,6 +133,8 @@ int main(int argc, char **argv) {
         window.draw(input2Text);
 
         // Draw the "Find Path" button and result
+        window.draw(dijkstraButton);
+        window.draw(aStarButton);
         window.draw(findPathButton);
         window.draw(resultText);
 
@@ -161,6 +171,7 @@ int main(int argc, char **argv) {
             std::cout << songname << std::endl;
         }
     }
+
 
     /*
     // Test CSV data points
