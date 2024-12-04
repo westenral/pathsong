@@ -2,7 +2,6 @@
 // Created by lilic on 12/2/2024.
 //
 
-#include <sstream>
 #include <cmath>
 #include "../include/song.h"
 
@@ -55,7 +54,20 @@ u8 Song::similarity(Song &rhs) {  // similarity sum / total similarity = similar
 
     modeSim = mode == rhs.mode;  // bool tht returns 0 or 1
     genreSim = genre == rhs.genre;
-    simScore = (u8)(((energySim + keySim + modeSim + genreSim) / 4.0) * 255);
+
+    const float genre_weight  = 1.0;
+    const float energy_weight = 1.0;
+    const float key_weight    = 4.0;
+    const float mode_weight   = 4.0;
+        
+    simScore = (u8)(((
+        energySim  * energy_weight
+        + keySim   * key_weight
+        + modeSim  * mode_weight
+        + genreSim * genre_weight)
+        / energy_weight + key_weight
+        + mode_weight + genre_weight
+    ) * 255);
 
     return simScore;
 }

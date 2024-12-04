@@ -67,9 +67,8 @@ void SongGraph::insert_weight(u32 from, u32 to, u8 weight) {
 }
 
 std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
-    return get_path_old(song1, song2);
+//    return get_path_old(song1, song2);
 
-    /*
     std::vector<u32> dist(songs.size(), 0xffffffff);
     dist[song1] = 0;
     std::vector<u32> predecessor(songs.size(), song1);
@@ -92,18 +91,34 @@ std::vector<u32> SongGraph::get_path(u32 song1, u32 song2) {
         
         if (dist[path.to] < difference) { continue; }
 
+        // "visit" path.to
         visited[path.to] = true;
         dist[path.to] = difference;
         predecessor[path.to] = path.from;
 
         auto to_adjacent_weights = weight[path.to];
         for (const auto &[to, weight] : to_adjacent_weights) {
-            paths.push()
+            // just trust me bro
+            if (visited[to]) { continue; }
+
+            u32 difference = dist[path.to] + 255 - weight;
+        
+            if (dist[to] < difference) { continue; }
+            paths.push({difference, path.to, to});
             dist[to] = dist[path.to] + weight;
         }
     }
 
-    */
+    std::vector<u32> path;
+    u32 next_song_id = song2;
+    while (next_song_id != song1) {
+        path.push_back(next_song_id);
+        next_song_id = predecessor[next_song_id];
+    }
+    path.push_back(song1);
+    std::reverse(path.begin(), path.end());
+
+    return path;
 }
 
 std::vector<u32> SongGraph::get_path_old(u32 song1, u32 song2) {
