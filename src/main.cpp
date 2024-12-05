@@ -191,45 +191,51 @@ int main(int argc, char **argv) {
 
 
             if (event.type == sf::Event::MouseButtonPressed) {
-                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
-                if (dijkstraButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    songgraph.use_astar = false;
-                    auto path = songgraph.get_path(song1, song2);
-                    if (path.empty()) {
-                        resultText.setString("No path found. Check spelling.");
-                    } else {
-                        std::string result = "Path: ";
-                        for (const auto& song : path) {
-                            result += song + " -> ";
+                    // Handle Dijkstra button click
+                    if (dijkstraButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        songgraph.use_astar = false;
+                        auto path = songgraph.get_path(song1, song2);
+                        if (path.empty()) {
+                            resultText.setString("No path found. Check spelling.");
+                        } else {
+                            std::string result = "Path:\n";
+                            for (size_t i = 0; i < path.size(); ++i) {
+                                result += path[i];
+                                if ((i + 1) % 3 == 0 || i == path.size() - 1) {
+                                    result += '\n';
+                                } else {
+                                    result += " -> ";
+                                }
+                            }
+                            resultText.setString(result);
                         }
-                        result = result.substr(0, result.size() - 4); // Remove trailing arrow
-                        result = wrapText(result, font, 18, window.getSize().x - 100); // Wrap text to fit window
-                        resultText.setString(result);
+                    }
+
+                    // Handle A* button click
+                    if (aStarButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        songgraph.use_astar = true;
+                        auto path = songgraph.get_path(song1, song2);
+                        if (path.empty()) {
+                            resultText.setString("No path found. Check spelling.");
+                        } else {
+                            std::string result = "Path:\n";
+                            for (size_t i = 0; i < path.size(); ++i) {
+                                result += path[i];
+                                if ((i + 1) % 3 == 0 || i == path.size() - 1) {
+                                    result += '\n';
+                                } else {
+                                    result += " -> ";
+                                }
+                            }
+                            resultText.setString(result);
+                        }
                     }
                 }
-                if (aStarButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    songgraph.use_astar = true;
-                    auto path = songgraph.get_path(song1, song2);
-                    if (path.empty()) {
-                        resultText.setString("No path found. Check spelling.");
-                    } else {
-                        std::string result = "Path: ";
-                        for (const auto& song : path) {
-                            result += song + " -> ";
-                        }
-                        result = result.substr(0, result.size() - 4); // Remove trailing arrow
-                        result = wrapText(result, font, 18, window.getSize().x - 100); // Wrap text to fit window
-                        resultText.setString(result);
-                    }
-                }
-                if (inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    isSong1Active = true;
-                } else if (inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    isSong1Active = false;
-                }
-
             }
+
 
             if (event.type == sf::Event::MouseWheelScrolled) {
                 float maxScroll = std::max(0.f, resultText.getLocalBounds().height - (window.getSize().y / 2));
