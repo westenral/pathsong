@@ -233,6 +233,11 @@ int main(int argc, char **argv) {
                             resultText.setString(result);
                         }
                     }
+                    if (inputBox1.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        isSong1Active = true;
+                    } else if (inputBox2.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        isSong1Active = false;
+                    }
                 }
             }
 
